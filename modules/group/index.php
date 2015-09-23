@@ -96,7 +96,10 @@ if ($is_editor) {
             } else {
                 $group_max = 0;
             }
-		
+
+	$is_in_tinymce = (isset($_REQUEST['embedtype']) && $_REQUEST['embedtype'] == 'tinymce') ? true : false;
+	$menuTypeID = ($is_in_tinymce) ? 5 : 2;
+	$tinymce_params = '';			
 
 // Create a hidden category for group forums
             $req = Database::get()->querySingle("SELECT id FROM forum_category
@@ -653,27 +656,11 @@ if ($is_editor) {
 		}
 	}
 	
-/*	if (isset($_GET['down'])) {
-    move_order('group', 'id', intval(getDirectReference($_GET['down'])), 'order', 'down', "course_id = $course_id");
-	} elseif (isset($_GET['up'])) {
-    move_order('group', 'id', intval(getDirectReference($_GET['up'])), 'order', 'up', "course_id = $course_id");
-	} elseif (isset($_GET['cdown'])) {
-    move_order('group_category', 'id', intval(getDirectReference($_GET['cdown'])), 'order', 'down', "course_id = $course_id");
-	} elseif (isset($_GET['cup'])) {
-    move_order('group_category', 'id', intval(getDirectReference($_GET['cup'])), 'order', 'up', "course_id = $course_id");
-}*/
 	$display_tools = $is_editor && !$is_in_tinymce;
 	if (!in_array($action, array('addcategory', 'editcategory'))) {
-    if ($social_bookmarks_enabled == 1) {
-        $countgroups = Database::get()->querySingle("SELECT COUNT(*) AS cnt FROM `group` WHERE course_id = ?d AND category_id <> ?d", $course_id, -1)->cnt;
-    } else {
-        $countgroups = Database::get()->querySingle("SELECT COUNT(*) AS cnt FROM `group` WHERE course_id = ?d AND category_id <> ?d AND category_id <> ?d", $course_id, -1, -2)->cnt;
-    }
-
-    if ($countgroups > 0) {
 	
 	$numberofzerocategory = count(Database::get()->queryArray("SELECT * FROM `group` WHERE course_id = ?d AND (category_id = 0 OR category_id IS NULL)", $course_id));
-	$cat = Database::get()->queryArray("SELECT * FROM `group_category` WHERE course_id = ?d ORDER BY `order`", $course_id);
+	$cat = Database::get()->queryArray("SELECT * FROM `group_category` WHERE course_id = ?d ORDER BY `name`", $course_id);
 	$aantalcategories = count($cat);
 	$tool_content .= "
         <div class='row'>
@@ -774,9 +761,6 @@ if ($is_editor) {
             $i++;
         }
         $tool_content .= "</table></div></div></div>";
-	}else {   // no links
-        $tool_content .= "<div class='alert alert-warning'>$langNoLinksExist</div>";
-    }
 
 add_units_navigation(TRUE);
 }
