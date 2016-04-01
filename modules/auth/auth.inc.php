@@ -133,13 +133,11 @@ function check_auth_configured($auth_id) {
 
 function count_auth_users($auth) {
     global $auth_ids;
+    
     $auth = intval($auth);
-
-    if ($auth === 1) {
-        for ($i = 2; $i <= count($auth_ids); $i++) {
-            $extra = " AND password != '{$auth_ids[$i]}'";
-        }
-        $result = Database::get()->querySingle("SELECT COUNT(*) AS total FROM user WHERE password != '{$auth_ids[1]}' $extra");
+    if ($auth === 1) {        
+        $result = Database::get()->querySingle("SELECT COUNT(*) AS total FROM user 
+                                                    WHERE password NOT IN (SELECT auth_name FROM auth WHERE id > 1)");
     } else {
         $result = Database::get()->querySingle("SELECT COUNT(*) AS total FROM user WHERE password = '" . $auth_ids[$auth] . "'");
     }
@@ -990,6 +988,12 @@ function alt_login($user_info_object, $uname, $pass) {
                 $_SESSION['surname'] = $user_info_object->surname;
                 $_SESSION['givenname'] = $user_info_object->givenname;
             }
+            if (!empty($_SESSION['auth_user_info']['studentid']) and
+                $user_info_object->am != $_SESSION['auth_user_info']['studentid']) {
+                Database::get()->query('UPDATE user SET am = ?s WHERE id = ?d',
+                    $_SESSION['auth_user_info']['studentid'],
+                    $user_info_object->id);
+            }
             $_SESSION['status'] = $user_info_object->status;
             $_SESSION['email'] = $user_info_object->email;
             $GLOBALS['language'] = $_SESSION['langswitch'] = $user_info_object->lang;
@@ -1101,6 +1105,10 @@ function shib_cas_login($type) {
             Database::get()->query("UPDATE user SET surname = ?s, givenname = ?s, email = ?s,
                                            status = ?d WHERE id = ?d",
                                         $surname, $givenname, $email, $status, $info->id);
+            if (!empty($am) and $info->am != $am) {
+                Database::get()->query('UPDATE user SET am = ?s WHERE id = ?d',
+                    $am, $info->id);
+            }
 
             $userObj->refresh($info->id, $options['departments']);
             user_hook($info->id);
@@ -1309,7 +1317,7 @@ function update_shibboleth_endpoint($settings) {
 
     $path = $webDir . '/secure';
     if (!file_exists($path)) {
-        if (!mkdir($path, 0700, true)) {
+        if (!make_dir($path)) {
             Session::Messages("Error: mkdir($path)", 'alert-danger');
             return false;
         }

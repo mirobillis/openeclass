@@ -280,8 +280,7 @@ $(document).ready(function(){
 });//document ready   
 
 function refresh_plots(){
-    xAxisTicksAdjust();    
-    console.log('refresh: selectedview='+selectedview+', stats = '+stats+', enddate = '+enddate);
+    xAxisTicksAdjust();        
     if(stats === 'c'){
         logs_refresh_required = true;
         if(selectedview == 'logs'){
@@ -339,7 +338,7 @@ function refresh_module_pref_plot(){
                 json: data.chartdata,
                 names: data.modules,
                 type:'pie',
-                onclick: function (d,i){ console.log(d.id);refresh_course_module_plot(d.id);}
+                onclick: function (d,i){refresh_course_module_plot(d.id);}
                 },
             bindto: '#modulepref_pie',
             tooltip: {
@@ -491,8 +490,7 @@ function refresh_course_pref_plot(){
     });
 }
 
-function refresh_user_course_plot(){    
-    console.log('course = '+course+', piecourse = '+piecourse+', module = '+module+', piemodule = '+piemodule);
+function refresh_user_course_plot(){        
     $.getJSON('results.php',{t:'uc', s:startdate, e:enddate, i:interval, u:user, c:piecourse, m:piemodule},function(data){
         if(data.chartdata.chartdata == null){
             $("#course_stats_title").text(data.charttitle);
@@ -540,12 +538,16 @@ function refresh_user_login_plot(){
                 xFormat: '%Y-%m-%d',
                 type:'area',
                 names:{
-                    logins: langLoginUser
+                    logins: langLoginUser,
+                    visits: langHits
+                },
+                axes:{
+                    logins: 'y'
                 }
             },
             zoom:{enabled:true},
             size:{height:250},
-            axis:{ x: {type:'timeseries', tick:{format: xAxisDateFormat[interval], rotate:60, values:xTicks, fit:false}, min: xMinVal, label: xAxisLabels[interval]}, y:{label: langLoginUser, padding:{top:0, bottom:0}}},
+            axis:{ x: {type:'timeseries', tick:{format: xAxisDateFormat[interval], rotate:60, values:xTicks, fit:false}, min: xMinVal, label: xAxisLabels[interval]}, y:{padding:{top:0, bottom:0}}},
             bindto: '#userlogins_stats'
         };
         /*if(typeof charts.ul !== "undefined"){
@@ -682,16 +684,19 @@ function xAxisTicksAdjust()
 {
 	var xmin = sdate;
 	var xmax = edate;
-	xMinVal = xmin.getFullYear()+'-'+(xmin.getMonth()+1)+'-'+1;
-	xMaxVal = xmax.getFullYear()+'-'+(xmax.getMonth()+1)+'-'+xmax.getDate();
-	dayMilliseconds = 24*60*60*1000;
+	
+        dayMilliseconds = 24*60*60*1000;
         diffInDays = (edate-sdate)/dayMilliseconds;
-        xTicks = [xMinVal];
+        xTicks = new Array();
 	var tick = new Date(xmin);
-        i = 0;
         cur = xmin.getMonth();
         if(interval == 1){
-            while(tick < xmax)
+            xMinVal = xmin.getFullYear()+'-'+(xmin.getMonth()+1)+'-'+tick.getDate();
+            xMaxVal = xmax.getFullYear()+'-'+(xmax.getMonth()+1)+'-'+xmax.getDate();
+            if(tick.getDate() == 1){
+                xTicks.push(xMinVal);
+            }
+            while(tick <= xmax)
             {
                     tick.setDate(tick.getDate() + 1);
                     tickval = tick.getFullYear()+'-'+(tick.getMonth()+1)+'-'+tick.getDate();
@@ -702,32 +707,46 @@ function xAxisTicksAdjust()
             }    
         }
         else if(interval == 7){
-            while(tick < xmax)
+            xminMonday = new Date(xmin.getTime() - xmin.getUTCDay()*dayMilliseconds);
+            xMinVal = xminMonday.getFullYear()+'-'+(xminMonday.getMonth()+1)+'-'+xminMonday.getDate();
+            xmaxMonday = new Date(xmax.getTime() + (7-xmax.getUTCDay())*dayMilliseconds);
+            xMaxVal = xmaxMonday.getFullYear()+'-'+(xmaxMonday.getMonth()+1)+'-'+xmaxMonday.getDate();
+            xTicks.push(xMinVal);
+            tick = new Date(xminMonday);
+            i = 1;
+            while(tick <= xmaxMonday)
             {
                     tick.setDate(tick.getDate() + 7);
                     tickval = tick.getFullYear()+'-'+(tick.getMonth()+1)+'-'+tick.getDate();
-                    if(i % 7 == 0)
+                    if(i % 2 == 0){
                         xTicks.push(tickval);
+                    }
                     i++;
+                    
             } 
         }
         else if(interval == 30){
-            while(tick < xmax)
+            xMinVal = xmin.getFullYear()+'-'+(xmin.getMonth()+1)+'-15';
+            xMaxVal = xmax.getFullYear()+'-'+(xmax.getMonth()+1)+'-15';
+            xTicks.push(xMinVal);
+            while(tick <= xmax)
             {
                     tick.setMonth(tick.getMonth() + 1);
-                    tickval = tick.getFullYear()+'-'+(tick.getMonth()+1)+'-'+tick.getDate();
+                    tickval = tick.getFullYear()+'-'+(tick.getMonth()+1)+'-15';
                     xTicks.push(tickval);
             } 
         }
         else if(interval == 365){
-            while(tick < xmax)
+            xMinVal = xmin.getFullYear()+'-06-30';
+            xMaxVal = xmax.getFullYear()+'-06-30';
+            xTicks.push(xMinVal);
+            while(tick <= xmax)
             {
                     tick.setFullYear(tick.getFullYear() + 1);
-                    tickval = tick.getFullYear()+'-'+(tick.getMonth()+1)+'-'+tick.getDate();
+                    tickval = tick.getFullYear()+'-06-30';
                     xTicks.push(tickval);
             }     
         }
-	xTicks.push(xMaxVal);
 }
 
 function refreshDataTable(datatableel, datarows)

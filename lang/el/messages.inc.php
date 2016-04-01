@@ -583,6 +583,7 @@ $langAdminAddAnn = "Προσθήκη ανακοίνωσης διαχειριστ
 $langAdminModifAnn = "Τροποποίηση ανακοίνωσης διαχειριστή";
 $langAdminAnnModify = "Η ανακοίνωση διαχειριστή τροποποιήθηκε";
 $langAdminAnVis = "Ορατή";
+$langAdminAnNotVis = "Μη ορατή";
 $langAdminAnnAdd = "Η ανακοίνωση διαχειριστή προστέθηκε";
 $langAdminAnnDel = "Η ανακοίνωση διαχειριστή διαγράφηκε";
 $langAdminAnnMes = "τοποθετήθηκε την";
@@ -1305,11 +1306,11 @@ $langAlertProf = "Παρακαλώ συμπληρώστε τον διδάσκο�
 
 // Admin mutiple course creation
 $langMultiCourse = "Μαζική δημιουργία $langsOfCourses";
-$langMultiCourseInfo = 'Εισαγάγετε στην παρακάτω περιοχή μια λίστα με τους
+$langMultiCourseInfo = "Εισαγάγετε στην παρακάτω περιοχή μια λίστα με τους
 τίτλους των $langsOfCourses που επιθυμείτε να δημιουργηθούν, με τον κάθε
 τίτλο σε ξεχωριστή γραμμή. Αν επιθυμείτε να προστεθεί αυτόματα
-καθηγητής στο '. $langsCourse . ', σημπληρώστε το ονοματεπώνυμο ή το όνομα χρήστη
-του μετά τον τίτλο, διαχωρισμένο με το χαρακτήρα "|".';
+καθηγητής στο $langsCourse, σημπληρώστε το ονοματεπώνυμο ή το όνομα χρήστη
+του μετά τον τίτλο, διαχωρισμένο με το χαρακτήρα \"|\".";
 $langMultiCourseTitles = "Τίτλοι / Καθηγητές $langOfCourses";
 $langMultiCourseData = "Στοιχεία $langOfCourses";
 $langMultiCourseCreated = "το $langsCourse δημιουργήθηκε";
@@ -3575,6 +3576,7 @@ $langVisitsShort = "Αρ. Επισκέψεων";
 $langHitsShort = "Αρ. Προβολών";
 $langFirstLetterUser = "Πρώτο Γράμμα Επωνύμου";
 $langFirstLetterCourse = "Πρώτο Γράμμα Τίτλου";
+$langAndTotalCourseVisits = "και συνολικών επισκέψεων σε $langsCourses";
 $langUsageVisits = "Στατιστικά Επισκεψιμότητας";
 $langFavourite = "Προτίμηση Υποσυστημάτων";
 $langFavouriteCourse = "Προτίμηση $langOfCourses";
@@ -3956,7 +3958,7 @@ $langDelAssign = "Διαγραφή Εργασίας";
 $langDelWarn1 = "Πρόκειται να διαγράψετε την εργασία με τίτλο";
 $langDelSure = "Είστε σίγουρος;";
 $langWorkFile = "Αρχείο";
-$langGradeType = "Τυπος Βαθμολογίας";
+$langGradeType = "Τύπος Βαθμολογίας";
 $langGradeNumbers = "Αριθμοί";
 $langGradeScales = "Βαθμολογικές Κλίμακες";
 $langGradeScalesSelect = "Επιλογή Κλίμακας";

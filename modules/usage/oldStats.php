@@ -66,13 +66,10 @@ $head_content .= "<script type='text/javascript'>
 
 
         sdate = $('#user_date_start').datepicker('getDate');
-        startdate = sdate.getFullYear()+'-'+(sdate.getMonth()+1)+'-'+sdate.getDate();
-        console.log('start   '+sdate+'  '+startdate);
+        startdate = sdate.getFullYear()+'-'+(sdate.getMonth()+1)+'-'+sdate.getDate();        
         edate = $('#user_date_end').datepicker('getDate');
-        enddate = edate.getFullYear()+'-'+(edate.getMonth()+1)+'-'+edate.getDate();
-        console.log('end   '+edate+'    '+enddate);
-        module = $('#u_module_id option:selected').val();
-        console.log('refresh_oldstats_course_plot('+startdate+', '+enddate+', $course_id, '+module);
+        enddate = edate.getFullYear()+'-'+(edate.getMonth()+1)+'-'+edate.getDate();        
+        module = $('#u_module_id option:selected').val();        
         refresh_oldstats_course_plot(startdate, enddate, $course_id, module);
     });
 
@@ -109,31 +106,69 @@ function xAxisTicksAdjust()
 {
 	var xmin = sdate;
 	var xmax = edate;
-	xMinVal = xmin.getFullYear()+'-'+(xmin.getMonth()+1)+'-'+1;
-	xMaxVal = xmax.getFullYear()+'-'+(xmax.getMonth()+1)+'-'+xmax.getDate();
-	dayMilliseconds = 24*60*60*1000;
+	
+        dayMilliseconds = 24*60*60*1000;
         diffInDays = (edate-sdate)/dayMilliseconds;
-        xTicks = [xMinVal];
+        xTicks = new Array();
 	var tick = new Date(xmin);
-        i = 0;
         cur = xmin.getMonth();
-        if(interval == 30){
-            while(tick < xmax)
+        if(interval == 1){
+            xMinVal = xmin.getFullYear()+'-'+(xmin.getMonth()+1)+'-'+tick.getDate();
+            xMaxVal = xmax.getFullYear()+'-'+(xmax.getMonth()+1)+'-'+xmax.getDate();
+            if(tick.getDate() == 1){
+                xTicks.push(xMinVal);
+            }
+            while(tick <= xmax)
+            {
+                    tick.setDate(tick.getDate() + 1);
+                    tickval = tick.getFullYear()+'-'+(tick.getMonth()+1)+'-'+tick.getDate();
+                    if(cur != tick.getMonth()){
+                        xTicks.push(tickval);
+                        cur = tick.getMonth();
+                    }
+            }    
+        }
+        else if(interval == 7){
+            xminMonday = new Date(xmin.getTime() - xmin.getUTCDay()*dayMilliseconds);
+            xMinVal = xminMonday.getFullYear()+'-'+(xminMonday.getMonth()+1)+'-'+xminMonday.getDate();
+            xmaxMonday = new Date(xmax.getTime() + (7-xmax.getUTCDay())*dayMilliseconds);
+            xMaxVal = xmaxMonday.getFullYear()+'-'+(xmaxMonday.getMonth()+1)+'-'+xmaxMonday.getDate();
+            xTicks.push(xMinVal);
+            tick = new Date(xminMonday);
+            i = 1;
+            while(tick <= xmaxMonday)
+            {
+                    tick.setDate(tick.getDate() + 7);
+                    tickval = tick.getFullYear()+'-'+(tick.getMonth()+1)+'-'+tick.getDate();
+                    if(i % 2 == 0){
+                        xTicks.push(tickval);
+                    }
+                    i++;
+                    
+            } 
+        }
+        else if(interval == 30){
+            xMinVal = xmin.getFullYear()+'-'+(xmin.getMonth()+1)+'-15';
+            xMaxVal = xmax.getFullYear()+'-'+(xmax.getMonth()+1)+'-15';
+            xTicks.push(xMinVal);
+            while(tick <= xmax)
             {
                     tick.setMonth(tick.getMonth() + 1);
-                    tickval = tick.getFullYear()+'-'+(tick.getMonth()+1)+'-'+tick.getDate();
+                    tickval = tick.getFullYear()+'-'+(tick.getMonth()+1)+'-15';
                     xTicks.push(tickval);
-            }
+            } 
         }
         else if(interval == 365){
-            while(tick < xmax)
+            xMinVal = xmin.getFullYear()+'-06-30';
+            xMaxVal = xmax.getFullYear()+'-06-30';
+            xTicks.push(xMinVal);
+            while(tick <= xmax)
             {
                     tick.setFullYear(tick.getFullYear() + 1);
-                    tickval = tick.getFullYear()+'-'+(tick.getMonth()+1)+'-'+tick.getDate();
+                    tickval = tick.getFullYear()+'-06-30';
                     xTicks.push(tickval);
-            }
+            }     
         }
-	xTicks.push(xMaxVal);
 }
 "
         . ""
@@ -205,10 +240,7 @@ foreach ($result as $row) {
 $min_t = date("d-m-Y", $min_time);
 
 $made_chart = true;
-//make chart
-require_once 'modules/graphics/plotter.php';
-$usage_defaults = array(
-    'u_stats_value' => 'visits',
+$usage_defaults = array(    
     'u_module_id' => -1
 );
 
@@ -231,16 +263,8 @@ foreach ($result as $row) {
     $mod_opts .= "<option value=" . $mid . " $extra>" . $modules[$mid]['title'] . "</option>";
 }
 
-$statsValueOptions = '<option value="visits" ' . (($u_stats_value == 'visits') ? ('selected') : ('')) . '>' . $langVisits . "</option>\n" .
-        '<option value="duration" ' . (($u_stats_value == 'duration') ? ('selected') : ('')) . '>' . $langDuration . "</option>\n";
-
-
 $tool_content .= '<div class="form-wrapper">';
 $tool_content .= '<form class="form-horizontal" role="form" method="post" action="' . $_SERVER['SCRIPT_NAME'] . '?course=' . $course_code . '">';
-$tool_content .= '<div class="form-group">
-                    <label class="col-sm-2 control-label">' . $langValueType . ':</label>
-                    <div class="col-sm-10"><select name="u_stats_value" class="form-control">' . $statsValueOptions . '</select></div>
-                  </div>';
 $tool_content .= "<div class='input-append date form-group' id='user_date_start' data-date = '" . q($user_date_start) . "' data-date-format='dd-mm-yyyy'>
     <label class='col-sm-2 control-label'>$langStartDate:</label>
         <div class='col-xs-10 col-sm-9'>
