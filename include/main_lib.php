@@ -167,11 +167,6 @@ define('JQUERY_VERSION', '2.1.1');
 
 require_once 'lib/session.class.php';
 
-// Check if a string looks like a valid email address
-function email_seems_valid($email) {
-    return (preg_match('#^[0-9a-z_\.\+-]+@([0-9a-z][0-9a-z-]*[0-9a-z]\.)+[a-z]{2,}$#i', $email) and !preg_match('#@.*--#', $email));
-}
-
 // ----------------------------------------------------------------------
 // for safety reasons use the functions below
 // ---------------------------------------------------------------------
@@ -296,8 +291,8 @@ function load_js($file, $init='') {
                 js_link('select2-3.5.1/select2.min.js');
             $file = "select2-3.5.1/select2_locale_$language.js";
         } elseif ($file == 'bootstrap-datetimepicker') {
-        $head_content .= css_link('bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css') .
-        js_link('bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js');        
+            $head_content .= css_link('bootstrap-datetimepicker/css/bootstrap-datetimepicker.css') .
+            js_link('bootstrap-datetimepicker/js/bootstrap-datetimepicker.js');
             $file = "bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.$language.js";
         } elseif ($file == 'bootstrap-timepicker') {
             $head_content .= css_link('bootstrap-timepicker/css/bootstrap-timepicker.min.css');

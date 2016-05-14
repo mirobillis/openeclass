@@ -42,8 +42,8 @@ function om_join_user($meeting_id, $username, $uid, $email, $surname, $name, $mo
 
     $url = $res->hostname.':'.$res->port;
 
-    $soapUsers = new SoapClient('http://'.$url.'/'.$res->webapp.'/services/UserService?wsdl');
-    $roomService = new SoapClient('http://'.$url.'/'.$res->webapp.'/services/RoomService?wsdl');
+    $soapUsers = new SoapClient($url.'/'.$res->webapp.'/services/UserService?wsdl');
+    $roomService = new SoapClient($url.'/'.$res->webapp.'/services/RoomService?wsdl');
 
     $rs = array();
     $rs = $soapUsers->getSession();
@@ -52,18 +52,18 @@ function om_join_user($meeting_id, $username, $uid, $email, $surname, $name, $mo
     
     $params = array(
             'SID' => $session_id,
-            'username' => utf8_encode($res->username),
-            'userpass' => utf8_encode($res->password)
-    );
+            'username' => $res->username,
+            'userpass' => $res->password
+        );
 
     $l = array();
     $l = $soapUsers->loginUser($params);
 
     $params = array(
             'SID' => $session_id,
-            'username' => utf8_encode($username),
-            'firstname' => utf8_encode($name),
-            'lastname' => utf8_encode($surname),
+            'username' => $username,
+            'firstname' => $name,
+            'lastname' => $surname,
             'profilePictureUrl' => '',
             'email' => $email,
             'externalUserId' => $uid,
@@ -76,7 +76,7 @@ function om_join_user($meeting_id, $username, $uid, $email, $surname, $name, $mo
     $rs = array();
     $rs = $soapUsers->setUserObjectAndGenerateRoomHash($params);
     
-    return 'http://'.$url.'/'.$res->webapp.'/?secureHash='.$rs->return;
+    return $url.'/'.$res->webapp.'/?secureHash='.$rs->return;
 }
 
 function om_session_running($meeting_id)
@@ -100,8 +100,8 @@ function om_session_running($meeting_id)
     
     $url = $res->hostname.':'.$res->port;
 
-    $soapUsers = new SoapClient('http://'.$url.'/'.$res->webapp.'/services/UserService?wsdl');
-    $roomService = new SoapClient('http://'.$url.'/'.$res->webapp.'/services/RoomService?wsdl');
+    $soapUsers = new SoapClient($url.'/'.$res->webapp.'/services/UserService?wsdl');
+    $roomService = new SoapClient($url.'/'.$res->webapp.'/services/RoomService?wsdl');
 
     $rs = array();
     $rs = $soapUsers->getSession();
@@ -110,8 +110,8 @@ function om_session_running($meeting_id)
     
     $params = array(
 	'SID' => $session_id,
-	'username' => utf8_encode($res->username),
-	'userpass' => utf8_encode($res->password)
+	'username' => $res->username,
+	'userpass' => $res->password
     );
 
     $l = array();
@@ -136,15 +136,24 @@ function om_session_running($meeting_id)
     return false;
 }
 
+/**
+ * @brief create Open Meeting Room
+ * @global type $course_id
+ * @param type $title
+ * @param type $meeting_id
+ * @param type $record
+ */
 function create_om_meeting($title, $meeting_id,$record)
 {
+    global $course_id;
+    
     $run_to = -1;
     $min_users  = 10000000;
 
     //Get all course participants
     $users_to_join = Database::get()->querySingle("SELECT COUNT(*) AS count FROM course_user, user
                                 WHERE course_user.course_id = ?d AND course_user.user_id = user.id", $course_id)->count;
-    //Algorithm to select BBB server GOES HERE ...
+    //Algorithm to select OM server GOES HERE ...
     if ($record == 'true') {
         $query = Database::get()->queryArray("SELECT * FROM om_servers WHERE enabled='true' AND enable_recordings=?s ",$record);
     } else {
@@ -205,8 +214,8 @@ function create_om_meeting($title, $meeting_id,$record)
     if ($res) {
         $url = $res->hostname.':'.$res->port;
 
-        $soapUsers = new SoapClient('http://'.$url.'/'.$res->webapp.'/services/UserService?wsdl');
-        $roomService = new SoapClient('http://'.$url.'/'.$res->webapp.'/services/RoomService?wsdl');
+        $soapUsers = new SoapClient($url.'/'.$res->webapp.'/services/UserService?wsdl');
+        $roomService = new SoapClient($url.'/'.$res->webapp.'/services/RoomService?wsdl');
 
         $rs = array();
         $rs = $soapUsers->getSession();
@@ -215,8 +224,8 @@ function create_om_meeting($title, $meeting_id,$record)
 
         $params = array(
             'SID' => $session_id,
-            'username' => utf8_encode($res->username),
-            'userpass' => utf8_encode($res->password)
+            'username' => $res->username,
+            'userpass' => $res->password
         );
 
         $l = array();
@@ -224,9 +233,9 @@ function create_om_meeting($title, $meeting_id,$record)
 
         $params = array(
             'SID' => $session_id,
-            'name' => utf8_encode($meeting_id),
+            'name' => $meeting_id,
             'roomtypes_id' => 1,
-            'comment' => utf8_encode($title),
+            'comment' => $title,
             'numberOfPartizipants' => $users_to_join+20,
             'ispublic' => true,
             'appointment' => false,
@@ -247,17 +256,21 @@ function create_om_meeting($title, $meeting_id,$record)
     }
 }
 
+
+/**
+ * @brief get Open Meeting Server active rooms
+ * @param type $om_server
+ * @return int
+ */
 function get_om_active_rooms($om_server)
 {
     $active_rooms = 0;
-    $res = Database::get()->querySingle("SELECT *
-                                    FROM om_servers
-                                    WHERE id=?d", $om_server);
+    $res = Database::get()->querySingle("SELECT * FROM om_servers WHERE id=?d", $om_server);
     
     $url = $res->hostname.':'.$res->port;
 
-    $soapUsers = new SoapClient('http://'.$url.'/'.$res->webapp.'/services/UserService?wsdl');
-    $roomService = new SoapClient('http://'.$url.'/'.$res->webapp.'/services/RoomService?wsdl');
+    $soapUsers = new SoapClient($url.'/'.$res->webapp.'/services/UserService?wsdl');
+    $roomService = new SoapClient($url.'/'.$res->webapp.'/services/RoomService?wsdl');
 
     $rs = array();
     $rs = $soapUsers->getSession();
@@ -266,8 +279,8 @@ function get_om_active_rooms($om_server)
     
     $params = array(
 	'SID' => $session_id,
-	'username' => utf8_encode($res->username),
-	'userpass' => utf8_encode($res->password)
+	'username' => $res->username,
+	'userpass' => $res->password
     );
 
     $l = array();
@@ -291,17 +304,20 @@ function get_om_active_rooms($om_server)
     return $active_rooms;
 }
 
+/**
+ * @brief get Open Meeting Server connected users
+ * @param type $om_server
+ * @return type
+ */
 function get_om_connected_users($om_server)
 {
     $connected_users = 0;
-    $res = Database::get()->querySingle("SELECT *
-                                    FROM om_servers
-                                    WHERE id=?d", $om_server);
-    
+    $res = Database::get()->querySingle("SELECT * FROM om_servers WHERE id=?d", $om_server);
+        
     $url = $res->hostname.':'.$res->port;
 
-    $soapUsers = new SoapClient('http://'.$url.'/'.$res->webapp.'/services/UserService?wsdl');
-    $roomService = new SoapClient('http://'.$url.'/'.$res->webapp.'/services/RoomService?wsdl');
+    $soapUsers = new SoapClient($url.'/'.$res->webapp.'/services/UserService?wsdl');
+    $roomService = new SoapClient($url.'/'.$res->webapp.'/services/RoomService?wsdl');
 
     $rs = array();
     $rs = $soapUsers->getSession();
@@ -310,8 +326,8 @@ function get_om_connected_users($om_server)
     
     $params = array(
 	'SID' => $session_id,
-	'username' => utf8_encode($res->username),
-	'userpass' => utf8_encode($res->password)
+	'username' => $res->username,
+	'userpass' => $res->password
     );
 
     $l = array();
@@ -335,17 +351,20 @@ function get_om_connected_users($om_server)
         );
 
         $cu = $roomService->getRoomCounters($params);
-
+        die($cu);
         $connected_users += $cu;
     }
     
     return $connected_users;
 }
 
+/**
+ * @brief get number of Open Meeting Servers
+ * @return type
+ */
 function get_total_om_servers()
 {
     $total = 0;
-
     if (get_config('ext_openmeetings_enabled')) {
         $total = Database::get()->querySingle("SELECT COUNT(*) AS count FROM om_servers WHERE enabled='true'")->count;
     }

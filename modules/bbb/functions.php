@@ -56,6 +56,8 @@ function new_bbb_session() {
     global $langBBBAlertTitle,$langBBBAlertMaxParticipants, $langJQCheckAll, $langJQUncheckAll;
     global $langEnd,$langBBBEndHelpBlock;
 
+    $BBBEndDate = Session::has('BBBEndDate') ? Session::get('BBBEndDate') : "";
+    $enableEndDate = Session::has('enableEndDate') ? Session::get('enableEndDate') : ($BBBEndDate ? 1 : 0);
     $textarea = rich_text_editor('desc', 4, 20, '');
     $start_date = new DateTime;
     $start_session = $start_date->format('d-m-Y H:i');
@@ -87,8 +89,8 @@ function new_bbb_session() {
             <div class='col-sm-10'>
                 <input class='form-control' type='text' name='start_session' id='start_session' value='$start_session'>
             </div>
-        </div>
-        <div class='input-append date form-group".(Session::getError('BBBEndDate') ? " has-error" : "")."' id='enddatepicker' data-date='$BBBEndDate' data-date-format='dd-mm-yyyy'>
+        </div>";
+        $tool_content .= "<div class='input-append date form-group".(Session::getError('BBBEndDate') ? " has-error" : "")."' id='enddatepicker' data-date='$BBBEndDate' data-date-format='dd-mm-yyyy'>
             <label for='BBBEndDate' class='col-sm-2 control-label'>$langEnd:</label>
             <div class='col-sm-10'>
                 <div class='input-group'>
@@ -99,8 +101,8 @@ function new_bbb_session() {
                 </div>
                 <span class='help-block'>".(Session::hasError('BBBEndDate') ? Session::getError('BBBEndDate') : "&nbsp;&nbsp;&nbsp;<i class='fa fa-share fa-rotate-270'></i> $langBBBEndHelpBlock")."</span>
             </div>
-        </div>          
-        <div class='form-group'>
+        </div>";          
+        $tool_content .= "<div class='form-group'>
             <label for='select-groups' class='col-sm-2 control-label'>$langParticipants:</label>
             <div class='col-sm-10'>
             <select name='groups[]' multiple='multiple' class='form-control' id='select-groups'>";
@@ -250,6 +252,12 @@ function add_update_bbb_session($title,$desc,$start_session,$end_session,$type,$
 
     // Groups of participants per session
     $r_group = '';
+    if (isset($_POST['groups']) and count($_POST['groups'] > 0)) {
+        foreach ($_POST['groups'] as $group) {
+            $r_group .= "$group" .',';        
+        }
+        $r_group = mb_substr($r_group, 0, -1); // remove last comma
+    }
 
     // Enable recording or not
     switch($record)
@@ -279,7 +287,7 @@ function add_update_bbb_session($title,$desc,$start_session,$end_session,$type,$
                                             $course_id, $title, $desc, $start_session, $end_session,
                                             $type, $status,
                                             generateRandomString(), generateRandomString(), generateRandomString(),
-                                            $minutes_before, $external_users,$r_group,$record,$sessionUsers);
+                                            $minutes_before, $external_users, $r_group, $record,$sessionUsers);
         $q = Database::get()->querySingle("SELECT meeting_id, title, mod_pw, att_pw FROM bbb_session WHERE id = ?d", $q->lastInsertID);
     }
     $new_meeting_id = $q->meeting_id;
@@ -430,8 +438,13 @@ function edit_bbb_session($session_id) {
 
     $startDate_obj = DateTime::createFromFormat('Y-m-d H:i:s', $row->start_date);
     $start = $startDate_obj->format('d-m-Y H:i');
-    $endDate_obj = DateTime::createFromFormat('Y-m-d H:i:s', $row->end_date);   
-    if(isset($row->end_date)) { $BBBEndDate = $endDate_obj->format('d-m-Y H:i'); }
+    $endDate_obj = DateTime::createFromFormat('Y-m-d H:i:s', $row->end_date);
+            
+    if(isset($row->end_date)) { 
+        $BBBEndDate = $endDate_obj->format('d-m-Y H:i');         
+    } else {
+        $BBBEndDate = NULL;
+    }
     $enableEndDate = Session::has('BBBEndDate') ? Session::get('BBBEndDate') : ($BBBEndDate ? 1 : 0);
 
     $textarea = rich_text_editor('desc', 4, 20, $row->description);
@@ -483,7 +496,7 @@ function edit_bbb_session($session_id) {
                         foreach ($res as $r) {
                             if (isset($r->id)) {
                                 $tool_content .= "<option value='_{$r->id}'";
-                                if (in_array(("'_{$r->id}'"), $r_group)) {
+                                if (in_array(("_{$r->id}"), $r_group)) {
                                     $tool_content .= ' selected';
                                 }
                                 $tool_content .=">" . q($r->name) . "</option>";
@@ -499,11 +512,11 @@ function edit_bbb_session($session_id) {
                                     GROUP BY u.id
                                     ORDER BY UPPER(u.surname), UPPER(u.givenname)";
                         $res = Database::get()->queryArray($sql, $course_id, USER_GUEST, $uid);
-                        $tool_content .= "<option value='-1' selected><h2>$langAllUsers</h2></option>";
+                        $tool_content .= "<option value='-1'><h2>$langAllUsers</h2></option>";
                         foreach ($res as $r) {
                             if (isset($r->user_id)) {
-                                $tool_content .= "<option value='{$r->user_id}'";
-                                if (in_array(("'{$r->user_id}'"), $r_group)) {
+                                $tool_content .= "<option value='{$r->user_id}'";                                
+                                if (in_array(("$r->user_id"), $r_group)) {
                                     $tool_content .= ' selected';
                                 }
                                 $tool_content .= ">" . q($r->name) . " (".q($r->username).")</option>";
@@ -604,45 +617,51 @@ function edit_bbb_session($session_id) {
                     //]]></script>';
 }
 
+
 /**
- * @brief Print a box with the details of a bbb session
+ ** @brief Print a box with the details of a bbb session
  * @global type $course_id
  * @global type $tool_content
  * @global type $is_editor
- * @global type $langNewBBBSessionStart
- * @global type $langNewBBBSessionType
- * @global type $langConfirmDelete
- * @global type $langNewBBBSessionPublic
- * @global type $langNewBBBSessionPrivate
- * @global type $langBBBSessionJoin
- * @global type $langNewBBBSessionDesc
  * @global type $course_code
+ * @global type $langNewBBBSessionStart
+ * @global type $langNewBBBSessionDesc,
+ * @global type $langNewBBBSessionEnd,
+ * @global type $langParticipants
+ * @global type $langConfirmDelete
+ * @global type $langBBBSessionJoin
  * @global type $langNote
  * @global type $langBBBNoteEnableJoin
  * @global type $langTitle
  * @global type $langActivate
  * @global type $langDeactivate
- * @global type $langModify
+ * @global type $langEditChange
  * @global type $langDelete
+ * @global type $langNoBBBSesssions
+ * @global type $langDaysLeft
+ * @global type $m
+ * @global type $langBBBNotServerAvailableStudent
+ * @global type $langBBBNotServerAvailableTeacher
+ * @global type $langBBBImportRecordings
+ * @global type $langAllUsers
  */
 function bbb_session_details() {
-    global $course_id, $tool_content, $is_editor, $course_code, $head_content,
-        $langNewBBBSessionStart, $langNewBBBSessionEnd, $langNewBBBSessionType, $langParticipants,
-        $langConfirmDelete, $langNewBBBSessionPublic, $langNewBBBSessionPrivate,
-        $langBBBSessionJoin, $langNewBBBSessionDesc, $langNote,
-        $langBBBNoteEnableJoin, $langTitle,$langActivate, $langDeactivate,
-        $langEditChange, $langDelete, $langNoBBBSesssions, $langDaysLeft, $m,
-        $langBBBNotServerAvailableStudent, $langBBBNotServerAvailableTeacher,
-        $langBBBImportRecordings;
+
+    global $course_id, $tool_content, $is_editor, $course_code,
+        $langNewBBBSessionStart, $langParticipants,$langConfirmDelete,
+        $langBBBSessionJoin, $langNote, $langBBBNoteEnableJoin, $langTitle, 
+        $langActivate, $langDeactivate, $langEditChange, $langDelete, $langNewBBBSessionDesc,
+        $langNoBBBSesssions, $langDaysLeft, $m, $langBBBNotServerAvailableStudent, $langNewBBBSessionEnd,
+        $langBBBNotServerAvailableTeacher, $langBBBImportRecordings, $langAllUsers;
 
     load_js('trunk8');
 
     $myGroups = Database::get()->queryArray("SELECT group_id FROM group_members WHERE user_id=?d", $_SESSION['uid']);
 
-    $activeClause = $is_editor? '': "AND active = '1'";
+    $activeClause = !$is_editor? '': "AND active = '1'";
     $result = Database::get()->queryArray("SELECT * FROM bbb_session
-        WHERE course_id = ?s $activeClause ORDER BY start_date DESC", $course_id);
-    if (get_total_bbb_servers() == '0' && get_total_om_servers() == '0' && get_total_webconf_servers() == '0' ) {
+                            WHERE course_id = ?s $activeClause ORDER BY start_date DESC", $course_id);
+    if (get_total_bbb_servers() == '0' && get_total_om_servers() == '0' && get_total_webconf_servers() == '0' ) {            
         if ($is_editor) {
             $tool_content .= "<p class='alert alert-danger'><b>$langNote</b>:<br />$langBBBNotServerAvailableTeacher</p>";
         } else {
@@ -667,6 +686,7 @@ function bbb_session_details() {
                              </tr>";
 
         define('DAY_MINUTES', 24 * 60);
+        
         foreach ($result as $row) {
             $participants = '';
             // Get participants
@@ -679,7 +699,11 @@ function bbb_session_details() {
                 if (preg_match('/^_/', $participant_uid)) {
                     $participants .= gid_to_name(str_replace("_", '', $participant_uid));
                 } else {
-                    $participants .= uid_to_name($participant_uid, 'fullname');
+                    if ($participant_uid == -1) {
+                        $participants .= $langAllUsers;
+                    } else {
+                        $participants .= uid_to_name($participant_uid, 'fullname');
+                    }
                 }
             }
             $participants = "<span class='trunk8'>$participants</span>";

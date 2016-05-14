@@ -3286,7 +3286,9 @@ $mysqlMainDb = ' . quote($mysqlMainDb) . ';
                         `conf_description` text DEFAULT NULL,
                         `status` enum('active','inactive') DEFAULT NULL,
                         `start` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                        PRIMARY KEY (`conf_id`)) $charset_spec");
+                        `user_id` varchar(255) DEFAULT '0',
+                        `group_id` varchar(255) DEFAULT '0',
+                        PRIMARY KEY (`conf_id`,`course_id`)) $charset_spec");
 
         // om_servers table
         Database::get()->query('CREATE TABLE IF NOT EXISTS `om_servers` (
@@ -3328,12 +3330,7 @@ $mysqlMainDb = ' . quote($mysqlMainDb) . ';
         if (!DBHelper::fieldExists('poll', 'type')) {
             Database::get()->query("ALTER TABLE `poll` ADD `type` TINYINT(1) NOT NULL DEFAULT 0");
         }
-
-        if (!DBHelper::fieldExists('conference', 'conf_title')) {
-            Database::get()->query("ALTER TABLE `conference` ADD `conf_title` text NOT NULL AFTER course_id");
-        }
-
-        
+               
         Database::get()->query('INSERT IGNORE INTO course_module
             (module_id, visible, course_id)
             SELECT ?d, 0, id FROM course', MODULE_ID_MINDMAP);
