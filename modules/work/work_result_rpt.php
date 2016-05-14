@@ -32,41 +32,44 @@ require_once 'modules/group/group_functions.php';
 $nameTools = $langAutoJudgeDetailedReport;
 
 if (isset($_GET['assignment']) && isset($_GET['submission'])) {
+    global $tool_content, $course_code, $m, $langAutoJudgeNotEnabledForReport;
     $as_id = intval($_GET['assignment']);
     $sub_id = intval($_GET['submission']);
     $assign = get_assignment_details($as_id);
     $sub = get_assignment_submit_details($sub_id);
 
-    if ($sub==null || $assign==null) {
+    if($sub==null || $assign==null)
+    {
         redirect_to_home_page('modules/work/index.php?course='.$course_code);
     }
 
-    $navigation[] = array('url' => "index.php?course=$course_code", 'name' => $langWorks);
-    $navigation[] = array('url' => "index.php?course=$course_code&amp;id=$as_id", 'name' => q($assign->title));
+    $navigation[] = array("url" => "index.php?course=$course_code", "name" => $langWorks);
+    $navigation[] = array("url" => "index.php?course=$course_code&amp;id=$as_id", "name" => q($assign->title));
 
     if (count($sub)>0) {
-        if($assign->auto_judge){ // auto_judge enable
+        if($assign->auto_judge){// auto_judge enable
             $auto_judge_scenarios = unserialize($assign->auto_judge_scenarios);
             $auto_judge_scenarios_output = unserialize($sub->auto_judge_scenarios_output);
 
-            if (!isset($_GET['downloadpdf'])){
+            if(!isset($_GET['downloadpdf'])){
                 show_report($as_id, $sub_id, $assign, $sub, $auto_judge_scenarios, $auto_judge_scenarios_output);
                 draw($tool_content, 2);
-            } else {
+            }else{
                 download_pdf_file($assign, $sub, $auto_judge_scenarios, $auto_judge_scenarios_output);
             }
-        } else {
-            Session::Messages($langAutoJudgeNotEnabledForReport, 'alert-danger');
-            draw($tool_content, 2);
-        }
-    } else {
-        Session::Messages($m['WorkNoSubmission'], 'alert-danger');
-        redirect_to_home_page('modules/work/index.php?course='.$course_code.'&id='.$id);
-    }
+         }
+         else{
+               Session::Messages($langAutoJudgeNotEnabledForReport, 'alert-danger');
+              draw($tool_content, 2);
+             }
+      } else {
+            Session::Messages($m['WorkNoSubmission'], 'alert-danger');
+            redirect_to_home_page('modules/work/index.php?course='.$course_code.'&id='.$id);
+       }
 
-} else {
-    redirect_to_home_page('modules/work/index.php?course='.$course_code);
-}
+   } else {
+        redirect_to_home_page('modules/work/index.php?course='.$course_code);
+    }
 
 // Returns an array of the details of assignment $id
 function get_assignment_details($id) {
@@ -89,52 +92,91 @@ function get_submission_rank($assign_id,$grade, $submission_date) {
 }
 
 function show_report($id, $sid, $assign,$sub, $auto_judge_scenarios, $auto_judge_scenarios_output) {
-    global $m, $course_code,$tool_content, $langAutoJudgeInput, $langAutoJudgeOutput,
-        $langAutoJudgeExpectedOutput, $langAutoJudgeOperator, $langAutoJudgeWeight,
-        $langAutoJudgeResult, $langAutoJudgeResultsFor, $langAutoJudgeRank,
-        $langAutoJudgeDownloadPdf, $langBack;
-    $tool_content = "
-        <table  style=\"table-layout: fixed; width: 99%\" class='table-default'>
-        <tr> <td> <b>$langAutoJudgeResultsFor</b>: ".  q(uid_to_name($sub->uid))."</td> </tr>
-        <tr> <td> <b>".$m['grade']."</b>: $sub->grade /$assign->max_grade </td>
-             <td><b> $langAutoJudgeRank</b>: ".get_submission_rank($assign->id,$sub->grade, $sub->submission_date)." </td>
-        </tr>
-          <tr> <td> <b>$langAutoJudgeInput</b> </td>
-               <td> <b>$langAutoJudgeOutput</b> </td>
-               <td> <b>$langAutoJudgeOperator</b> </td>
-               <td> <b>$langAutoJudgeExpectedOutput</b> </td>
-               <td> <b>$langAutoJudgeWeight</b> </td>
-               <td> <b>$langAutoJudgeResult</b> </td>
-        </tr>
-        ".get_table_content($auto_judge_scenarios, $auto_judge_scenarios_output, $assign->max_grade)."
-        </table>
-        <p align='left'><a href='work_result_rpt.php?course=".$course_code."&assignment=".$assign->id."&submission=".$sid."&downloadpdf=1'>$langAutoJudgeDownloadPdf</a></p>
-        <p align='right'><a href='index.php?course=".$course_code."'>$langBack</a></p>
-     <br>";
-}
+         global $m, $course_code,$tool_content, $langAutoJudgeInput, $langAutoJudgeOutput,
+                 $langAutoJudgeExpectedOutput, $langAutoJudgeOperator, $langAutoJudgeWeight,
+                 $langAutoJudgeResult, $langAutoJudgeResultsFor, $langAutoJudgeRank,
+                 $langAutoJudgeDownloadPdf, $langBack;
+               $tool_content = "
+                                <table  style=\"table-layout: fixed; width: 99%\" class='table-default'>
+                                <tr> <td> <b>$langAutoJudgeResultsFor</b>: ".  q(uid_to_name($sub->uid))."</td> </tr>
+                                <tr> <td> <b>".$m['grade']."</b>: $sub->grade /$assign->max_grade </td>
+                                     <td><b> $langAutoJudgeRank</b>: ".get_submission_rank($assign->id,$sub->grade, $sub->submission_date)." </td>
+                                </tr>
+                                  <tr> <td> <b>$langAutoJudgeInput</b> </td>
+                                       <td> <b>$langAutoJudgeOutput</b> </td>
+                                       <td> <b>$langAutoJudgeExpectedOutput</b> </td>
+                                       <td> <b>$langAutoJudgeWeight</b> </td>
+                                       <td> <b>$langAutoJudgeResult</b> </td>
+                                </tr>
+                                ".get_table_content($auto_judge_scenarios, $auto_judge_scenarios_output, $assign->max_grade,$sub->grade_comment_error)."
+                                </table>
+                                <p align='left'><a href='work_result_rpt.php?course=".$course_code."&assignment=".$assign->id."&submission=".$sid."&downloadpdf=1'>$langAutoJudgeDownloadPdf</a></p>
+                                <p align='right'><a href='index.php?course=".$course_code."'>$langBack</a></p>
+                             <br>";
+  }
 
-function get_table_content($auto_judge_scenarios, $auto_judge_scenarios_output, $max_grade) {
+function get_table_content($auto_judge_scenarios, $auto_judge_scenarios_output, $max_grade,$comment_error) {
     global $themeimg, $langAutoJudgeAssertions;
     $table_content = "";
     $i=0;
-
+    $span1 = "<span style=\"color:#ff0000;\">";  $span2 = "</span>";//background-color:#ffff66;
     foreach($auto_judge_scenarios as $cur_senarios){
-        if (!isset($cur_senarios['output'])) { // expected output disable
-            $cur_senarios['output'] = '-';
-        }
-        $icon = ($auto_judge_scenarios_output[$i]['passed']==1) ? 'tick.png' : 'delete.png';
-        $table_content.="
-           <tr>
-               <td style=\"word-break:break-all;\">".str_replace(' ', '&nbsp;', $cur_senarios['input'])."</td>
-               <td style=\"word-break:break-all;\">".$auto_judge_scenarios_output[$i]['student_output']."</td>
-               <td style=\"word-break:break-all;\">".$langAutoJudgeAssertions[$cur_senarios['assertion']]."</td>
-               <td style=\"word-break:break-all;\">".str_replace(' ', '&nbsp;', $cur_senarios['output'])."</td>
-               <td align=\"center\" style=\"word-break:break-all;\">".$cur_senarios['weight']."/".$max_grade."</td>
-               <td align=\"center\"><img src=\"http://".$_SERVER['HTTP_HOST'].$themeimg."/" .$icon."\"></td></tr>";
-        $i++;
-    }
-    return $table_content;
-}
+           if(!isset($cur_senarios['output']))// expected output disable
+               $cur_senarios['output'] = "-";
+           $icon = ($auto_judge_scenarios_output[$i]['passed']==1) ? 'tick.png' : 'delete.png';
+           $table_content.="
+                           <tr>
+                           <td style=\"word-break:break-all;\">".str_replace(' ', '&nbsp;', $cur_senarios['input'])."</td>                        
+                           <td style=\"word-break:break-all;\">".(isset($auto_judge_scenarios_output[$i]['student_output'])? str_replace(' ', '&nbsp;',$auto_judge_scenarios_output[$i]['student_output']):" ")."</td>";
+                           switch($cur_senarios['assertion'])
+                           {
+                               case 'integer':
+                               case 'float':
+                               case  'digit':
+                               case 'boolean':
+                               case  'notEmpty':
+                               case 'notNull':
+                               case 'string':
+                               case 'numeric':
+                               case 'isArray':
+                               case 'true':
+                               case 'false':
+                               case 'isJsonString':
+                               case 'isObject':
+                               $table_content .="<td style=\"word-break:break-all;color:#0033cc;\">".str_replace(' ', '&nbsp;',$langAutoJudgeAssertions[$cur_senarios['assertion']])."</td>";
+                               break;
+                               default:                               
+                               $table_content .="<td style=\"word-break:break-all;\">".str_replace(' ', '&nbsp;', $cur_senarios['output'])."</td>";
+                               break;
+                           }
+                           $table_content .=" 
+                           <td align=\"center\" style=\"word-break:break-all;\">".$cur_senarios['weight']."/".$max_grade."</td>
+                           <td align=\"center\"><img src=\"http://".$_SERVER['HTTP_HOST'].$themeimg."/" .$icon."\"></td></tr>";
+                           if($auto_judge_scenarios_output[$i]['passed']!=1 && isset($cur_senarios['feedback_check']) && (strlen($comment_error)<=0 || $comment_error==Null))
+                           {
+                               $feedback_text = ($cur_senarios['feedback_text'] != '') ? $span1.$cur_senarios['feedback_text'].$span2.'<br><br>' : "" ;
+                               if($cur_senarios['feedback_scenario_count']>0)
+                               {
+                                   $j=0;
+                                   $index=1;
+                                   foreach( $cur_senarios['feedback_scenario'] as $feedback_scenario )
+                                   {
+                                    if($auto_judge_scenarios_output[$i]['feedback_scenario_passed'][$j]['matched']==1)
+                                     {
+                                         $feedback_text .=( $feedback_scenario['feedback_text']=='') ? '' : $span1.'#'.$index.' '.$feedback_scenario['feedback_text'].$span2."<br>" ; $index++;
+                                         $feedback_text .= show_assertion_results($feedback_scenario['Assertion'],$cur_senarios['input'],$auto_judge_scenarios_output[$i]['student_output'],$cur_senarios['output'])."<br>";
+                                     }
+                                      $j++;                                    
+                                   }
+                               }     
+                            $table_content.="<tr><td  colspan=\"5\" style=\"word-break:break-all;\">".$feedback_text."</td></tr>";   
+                           }                          
+                     $i++;//.str_replace(' ', '&nbsp;', )
+                }
+                if( strlen($comment_error)>0 )
+                 $table_content.="<tr><td  colspan=\"5\" style=\"word-break:break-all;color:red\">".$comment_error."</td></tr>";   
+       return $table_content;
+  }
 
 function download_pdf_file($assign, $sub, $auto_judge_scenarios, $auto_judge_scenarios_output) {
     global $langAutoJudgeInput, $langAutoJudgeOutput,
@@ -207,15 +249,15 @@ function download_pdf_file($assign, $sub, $auto_judge_scenarios, $auto_judge_sce
         <tr>
             <th>' . $langAutoJudgeInput . '</th>
             <th>' . $langAutoJudgeOutput . '</th>
-            <th>' . $langAutoJudgeOperator . '</th>
             <th>' . $langAutoJudgeExpectedOutput . '</th>
             <th>' . $langAutoJudgeWeight . '</th>
             <th>' . $langAutoJudgeResult . '</th>
         </tr>
-     '. get_table_content($auto_judge_scenarios, $auto_judge_scenarios_output,$assign->max_grade).'
+     '. get_table_content($auto_judge_scenarios, $auto_judge_scenarios_output,$assign->max_grade,$sub->grade_comment_error).'
     </table>';
 
-    $report_details ='
+
+ $report_details ='
     <style>
     table.first{
         width: 100%;
@@ -264,4 +306,228 @@ function download_pdf_file($assign, $sub, $auto_judge_scenarios, $auto_judge_sce
     $pdf->Ln();
     $pdf->writeHTML($report_table, true, false, true, false, '');
     $pdf->Output('auto_judge_report_'.q(uid_to_name($sub->uid)).'.pdf', 'D');
+}
+
+function show_assertion_results($assertion,$input,$output,$xoutput)
+{
+  global $langAutoJudgeFeedBackResultMatch,$langAutoJudgeOutput,$langAutoJudgeFeedBackResultMatchTokens;
+  $build = "";$wrong = "";
+  $span1 = "<span style=\"color:#ff0000;background-color:#ffff66;\">";  $span2 = "</span>";
+  $filler="<span style=\"color:#ff0000;\">==================================================================================</span><br>";  
+  $indexes = " ";
+  $indexStart = -1;
+  $changed = false;
+  $i=0;  
+  switch($assertion)
+  {   
+      case 'anagram':  
+      $len = strlen($output);
+      { 
+         $visited = " "; 
+         $locations ="";
+         $posar = [];
+         $out = strtolower($output);
+         $xout = strtolower($xoutput);         
+         for($i=0;$i<$len;$i++){             
+            if($out[$i]==$xout[$i]){
+              if($indexStart!=(-1)){
+                    $build .= $span1.str_replace(' ', '&nbsp;',$wrong).$span2;
+                    $wrong = "";
+                    if($indexStart!=($i-1))
+                       $indexes .= "{".$indexStart."-".($i-1)."} ";
+                    else 
+                       $indexes .= $indexStart." ";
+                    $indexStart=-1;
+              }
+              $build.=str_replace(' ', '&nbsp;',$xout[$i]);                    
+              $posar[$i]='x';
+              $visited .= $i." ";
+            }
+            else{
+                if($indexStart==(-1))
+                      $indexStart=$i;
+                 $wrong .= $output[$i];
+            }
+         }
+         if($indexStart!=(-1)){
+                 $build .= $span1.str_replace(' ', '&nbsp;',$wrong).$span2;
+                 if($indexStart!=($i-1))
+                    $indexes .= "{".$indexStart."-".($i-1)."} ";
+                 else 
+                    $indexes .= $indexStart." ";
+         }
+         for($i=0;$i<$len;$i++){             
+             if(isset($posar[$i]))
+               continue;
+            for($j=0;$j<$len;$j++){
+               if(strpos($visited,' '.$j.' ')===false && $xout[$i]==$out[$j]){
+                  $visited.= " ".$j." ";
+                  $locations .= "Character [".$xoutput[$i]."] found on position {".$j."} instead of position {".$i."}<br>";
+                  break;
+               }                   
+             }
+         }
+      }
+      return $filler.$langAutoJudgeFeedBackResultMatch.":[".$indexes."]<br>".$locations."<br>".$langAutoJudgeOutput.":<br>".$build."<br>".$filler;             
+      case 'missing': {
+       for($i=0;$i<strlen($xoutput);$i++){
+            if(strlen($output)==0) $matcher=null;
+            else $matcher = $output[0];                
+            if($xoutput[$i]==$matcher ){
+              if($indexStart!=(-1)){
+                    $build .= $span1.str_replace(' ', '&nbsp;',$wrong).$span2;
+                    $wrong = "";
+                    if($indexStart!=($i-1))
+                       $indexes .= "{".$indexStart."-".($i-1)."} ";
+                    else 
+                       $indexes .= $indexStart." ";
+                    $indexStart=-1;
+              }
+              $build.=str_replace(' ', '&nbsp;',$matcher);
+              $output = substr($output, 1);              
+            }
+            else{
+                if($indexStart==(-1))
+                      $indexStart=$i;
+                 $wrong .= $xoutput[$i];
+            }
+        }
+         if($indexStart!=(-1)){
+                 $build .= $span1.str_replace(' ', '&nbsp;',$wrong).$span2;
+                 if($indexStart!=($i-1))
+                    $indexes .= "{".$indexStart."-".($i-1)."} ";
+                 else 
+                    $indexes .= $indexStart." ";
+         }
+      }
+      return $filler.$langAutoJudgeFeedBackResultMatch.":[".$indexes."]<br><br>".$langAutoJudgeOutput.":<br>".$build."<br>".$filler; 
+      case 'redundant': {
+          $xout = strtolower($xoutput);
+          $out = strtolower($output);
+          $prevpos=-1;
+          for($i=0;$i<strlen($xout);$i++){
+              if($prevpos==(-1))
+               $pos =strpos($out,$xout[$i]);
+              else
+               $pos =strpos($out,$xout[$i],$prevpos+1);
+              if($prevpos==(-1)){
+                  if($pos!=0){                    
+                      $build.= $span1.'<del>'.str_replace(' ', '&nbsp;',substr($output,0,$pos)).'</del>'.$span2;
+                      if($pos==1)
+                          $index.='0 ';
+                      else
+                          $indexes.='{0-'.($pos-1).'} ';
+                  }
+              }
+              else{
+                  if( ($pos-$prevpos)==2 ){
+                      $build.= $span1.'<del>'.str_replace(' ', '&nbsp;',$output[$pos-1]).'</del>'.$span2;
+                      $indexes .= ($pos-1)." ";
+                  }
+                  else if( ($pos-$prevpos)>2){
+                      $build.= $span1.'<del>'.str_replace(' ', '&nbsp;',substr($output,$prevpos+1,$pos-($prevpos+1))).'</del>'.$span2;
+                      $indexes .= "{".($prevpos+1)."-".($pos-1)."} ";
+                  }
+              }
+              $prevpos=$pos;
+              $build.= str_replace(' ', '&nbsp;',$output[$pos]);
+          }
+          if($pos!=(strlen($output)-1)){
+              $temp = substr($output,$prevpos+1);
+              $build .=$span1.'<del>'.str_replace(' ', '&nbsp;',$temp).'</del>'.$span2;
+              if(strlen($temp)==1)
+                  $indexes .= ($prevpos+1)." ";
+              else
+                  $indexes .= "{".($pos+1)."-".(strlen($output)-1)."} ";
+          }
+      }
+      return  $filler.$langAutoJudgeFeedBackResultMatch.":[".$indexes."]<br><br>".$langAutoJudgeOutput.":<br>".$build."<br>".$filler."<br>";
+      case 'CaseSensitive': {
+            for($i;$i<strlen($output);$i++){
+                if($output[$i]==$xoutput[$i]){
+                    if($indexStart!=(-1)){
+                        $build .= $span1.$wrong.$span2;
+                        $wrong = "";
+                        if($indexStart!=($i-1))
+                            $indexes .= "{".$indexStart."-".($i-1)."} ";
+                        else 
+                            $indexes .= $indexStart." ";
+                        $indexStart=-1;
+                    }
+                    $build.=str_replace(' ', '&nbsp;',$output[$i]);
+                }
+                else{
+                    if($indexStart==(-1))
+                        $indexStart=$i;
+                    $wrong .= $output[$i];
+                }
+            }
+            if($indexStart!=(-1)){
+                 $build .= $span1.$wrong.$span2;
+                 if($indexStart!=($i-1))
+                    $indexes .= "{".$indexStart."-".($i-1)."} ";
+                 else 
+                    $indexes .= $indexStart." ";
+             }
+      }
+            return  $filler.$langAutoJudgeFeedBackResultMatch.":[".$indexes."]<br><br>".$langAutoJudgeOutput.":<br>".$build."<br>".$filler;             
+      case 'RepeatableLetters':return 'RepeatableLetters';
+      case 'different': 
+      $indexStart=-1;
+      for($i=0;$i<strlen($output);$i++){
+          if($output[$i]==$xoutput[$i]){
+                    if($indexStart!=(-1)){
+                        $build .= $span1.$wrong.$span2;
+                        $wrong = "";
+                        if($indexStart!=($i-1))
+                            $indexes .= "{".$indexStart."-".($i-1)."} ";
+                        else 
+                            $indexes .= $indexStart." ";
+                        $indexStart=-1;
+                    }
+                    $build.=str_replace(' ', '&nbsp;',$output[$i]);
+                }
+                else{
+                    if($indexStart==(-1))
+                        $indexStart=$i;
+                    $wrong .= $output[$i];
+                }
+     }
+            if($indexStart!=(-1)){
+                 $build .= $span1.$wrong.$span2;
+                 if($indexStart!=($i-1))
+                    $indexes .= "{".$indexStart."-".($i-1)."} ";
+                 else 
+                    $indexes .= $indexStart." ";
+             }
+      return  $filler.$langAutoJudgeFeedBackResultMatch.":[".$indexes."]<br><br>".$langAutoJudgeOutput.":<br>".$build."<br>".$filler;   
+      case 'order':
+      $words = "";
+      $replaces= "";     
+      $xout = array_filter(preg_split ( '/[\t\n,;!. ]+/' , strtolower($xoutput)));
+      $out = array_filter( preg_split ( '/[\t\n,;!. ]+/' , strtolower($output)));
+      for($i=0;$i<count($out);$i++){
+          if($out[$i]==$xout[$i])
+          $pos[$i] = 1;
+          else
+          $pos[$i] = 0;
+      }
+      for($i=0;$i<count($out);$i++){
+            if($out[$i]==$xout[$i]){     
+                $words .= $out[$i]." "; 
+                continue;
+            }
+            else for($j=0;$j<count($out);$j++){
+                if($pos[$j]==0 && $xout[$j]==$out[$i]){
+                    $pos[$j]=1;
+                    $words.= $span1.$out[$i].$span2." ";
+                    $replaces .= "Token [".$out[$i]."] found on position {".$i."} instead of position {".$j."}.<br>";
+                    $indexes .= ($i+1)." ";
+                    break;
+                }
+            }
+      }
+      return $filler.$langAutoJudgeFeedBackResultMatchTokens.':[ '.$indexes."]<br>".$replaces.$words;
+      default: return "";
+  }
 }

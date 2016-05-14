@@ -4115,32 +4115,66 @@ $langAutoJudgeShowWorkResultRpt = 'Show work report results';
 $langAutoJudgeRank = 'Rank';
 $langAutoJudgeScenariosPassed = 'Scenarios passed';
 $langAutoJudgeAssertions = array(
-    "eq" => "is equal to",
-    "same" => "is the same with",
-    "notEq" => "is not equal to",
-    "notSame" => "is not the same with",
-    "integer" => "is integer",
-    "float" => "is float",
-    "digit" => "is digit",
-    "boolean" => "is boolean",
-    "notEmpty" => "is not empty",
-    "notNull" => "is not Null",
-    "string" => "is string",
-    "startsWith" => "begins with",
-    "endsWith" => "ends in",
-    "contains" => "contains",
-    "numeric" => "is numeric",
-    "isArray" => "is array",
-    "true" => "is true",
-    "false" => "is false",
-    "isJsonString" => "is JSON string ",
-    "isObject" => "is object",
+    "eq" => "equal to",
+    "same" => "the same with",
+    "notEq" => "not equal to",
+    "notSame" => "not the same with",
+    "integer" => "integer",
+    "float" => "float",
+    "digit" => "digit",
+    "boolean" => "boolean",
+    "notEmpty" => "not empty",
+    "notNull" => "not Null",
+    "string" => "string",
+    "startsWith" => "starting with",
+    "endsWith" => "ending in",
+    "contains" => "containing",
+    "numeric" => "numeric",
+    "isArray" => "array",
+    "true" => "true",
+    "false" => "false",
+    "isJsonString" => "JSON string ",
+    "isObject" => "object",
+    "CaseSensitive" => "case Sensitive",
+    "anagram" => "containing anagrams",
+    "missing" => "missing characters",
+    "redundant" => "containing redundant chars",
+    "different"  => "is different",
+        "order" => "has wrong tokens order" ,
+    "arithmeticEq" => "arithmetical =" ,
+    "arithmeticNeq" => "arithmetical !=" ,
+    "arithmeticGeq" => "arithmetical >=" ,
+    "arithmeticGr" => "arithmetical >" , 
+    "arithmeticLeq" => "arithmetical <=" ,
+    "arithmeticLs" => "arithmetical <" 
 );
 $langAutoJudgeDetailedReport = 'Auto Judge: Detailed Report';
 $langAutoJudgeResultsFor = 'Results for';
 $langAutoJudgeNotEnabledForReport = 'Autojudge is not enabled for this assignment';
 $langAutoJudgeDownloadPdf = 'Download in PDF format';
 $langAutojudgeDescription = '<p>The Auto Judge is a tool to automate grading and correction of programming assignments. More specifically, the $langsCourse administrator can define scenarios that include input and output based on which the posted assignments are automatically graded.</p><p>This module contacts third-party compilation services which can be selected in <a href="autojudgemoduleconf.php">Settings</a>.</p>';
+
+//Autojudge feedback
+$langAutoJudgeFeedBack = 'feedback';
+$langAutoJudgeFeedBackNew = 'Add Feedback Scenario';
+$langAutoJudgeFeedBackText = 'Feedback Message';
+$langAutoJudgeFeedBackDelete = 'Delete Scenario';
+$langAutoJudgeFeedBackBadOutput = 'Wrong Output'; 
+$langAutoJudgeFeedBackForInput ="For input";
+$langAutoJudgeFeedBackOutBe = "the output must be";
+$langAutoJudgeFeedBackMistake = 'Possible Error : The output is';
+$langAutoJudgeFeedBackHelp = 'The feedback scenarios have as input the prior scenario  but as  expected output the one from the coreesponded feedback scenario in order to show the error message or not!<br>
+<p>SPECIAL CASES<br><u>1)CaseSensitive</u>:same length,difference only on upper-lower case<br>e.g upPer! instead of UPPER!<br><u>2)Anagram</u>:same length,same characters but wrong order(even for spaces) e.g margana instead of anagram<br>
+<u>3)Missing</u>:less length,same order,same characters but some missing<br>e.g msing instead of missing<br><u>4)Redundant</u>:bigger length,same characters,same order but redundant characters between them
+e.g Bsdf@re#d&*undadasntte instead of redundant<br><u>5)Differences</u>:same length,differences on some characters e.g difmereoce instead of difference<br><u>6)Aritmetical cases</u>:there are the comparison operators for numbers  and also the output can be 
+calculated based on two variables $in and $out<br>For input $in e.g Output:($in+5) with operator >= it will check if output >= from user-input+5 <br>
+For output $out e.g Output:($out^2) with operator = it will check if the output is the same as the square of the expected output</p>';
+$langAutoJudgeFeedBackResultMatch = 'Matched characters highlighted on positions(starting from zero)';
+$langAutoJudgeFeedBackResultMatchTokens = 'Matched tokens highlighted on positions(starting from 1)';
+$langAutoJudgeFeedBackGeneral = 'General feedback message for errors';
+$langAutoJudgeFeedBackScenarios = 'Special case feedback messages for errors';
+
+
 $langCourseInvalidDepartment = "The $langsCourse belongs to a department where $langsCourse creation is no longer permitted.";
 $langCourseInvalidDepartmentPrompt = 'Please %smove it from "Settings"%s.';
 $langActivateUserInfo = 'Enter below the usernames, one per line, of the accounts you wish to extend. Lines starting with # are ignored.';

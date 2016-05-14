@@ -251,6 +251,28 @@ You have also the option to add grading comments, while the student is able to v
 $langWork_studentContent = "<p>The assignments first page presents all the course assignments created by the teacher.
 To submit an assignment click on its title. If you have already submitted an assignment and you want to correct it you should resubmit it (submit the corrected version). The 'old' assignment will be replaced with the 'new' one.</p>
 <p>Please note that assignment submissions cannot be made after the deadline.</p>";
+
+//If autojudge is enabled
+$langHJWork = $langHWork;
+$langHJWork_student = $langHJWork ;
+$langJWorkContent = $langWorkContent."<h3 style='text-align:center;'>Auto Judge</h3><p>The user,after he checks the auto judge checkbox,can create scenarios,in order to grade the students automatically but also help them realize their mistakes.</p><p><b>Step 1)</b> Creating a scenario</p>The teacher
+must declare an input to the system<small>(this option may not be supported for some third parties compiler services options)</small>,
+one assertion and one expected output.<br><br>Next (s)he needs to fill the giver mark points for the scenario.The system,based on the input,returns an output.Based on the scenario assertion,the system
+decides if the students output is the same as the expected.If yes the student gets all the grades from the scenario</p><p><b>Step 2)</b> Creating feedback for a scenario(optional)</p>
+If the teacher checks the feedback checkbox,then (s)he can give a feedback message, which will be shown to the student in case of mistakes.
+Generally this field is filled automatically but the teacher can edit it freely.The teacher can also create more messages by pressing the new feedback button to create more special messages for some common mistakes the student might have done.<br>
+For the feedback scenarios the user input and expected output stay the same .If the student output is not the same with the expected,it will be checked if it matches with the wrong output the teacher gave,if yes then the special message will appear.
+The feedback scenario can be deleted with the corresponding button </p><p><b>Step 3)</b> Adding-Removing auto judge scenarios</p><p>By pressing the button new scenario the teacher can add new scenarios and by pressing 'Χ' can remove one(the first one cannot be removed)</p><h4 style='text-align:center;'>Special assertions</h4>
+<p><b>We dont have to fill expected output if :</b> the output is decimal,float,number,boolean,empty space,Null,string array,true ,false ,JSON string ,object</p>
+<b><p>In feedback assertions we have 7 special cases where in 1-6 we dont have to give wrong output</p><u>1)CaseSensitive</u></b>:same length,differences only on case sensitive characters<br>e.g. <span style='color:red;'>case!</span> instead of <span style='color:red;'>CASE!</span><br><b><u>2)Anagrams</u></b>:
+same length,same characters but in wrong order(even for empty spaces) <br> e.g. <span style='color:red;'>margana</span> instead of <span style='color:red;'>anagram</span><br><b><u>3)Missing characters</u></b>:less length,same order,same characters but some are missing<br>
+e.g. <span style='color:red;'>msing </span> instead of <span style='color:red;'>missing</span><br> <b><u>4)Redundant characters</u></b>:bigger length,correct characters in correct order but with redundant characters between them <br> e.g. <span style='color:red;'>Bsdf@re#d&*undadasntte</span>
+ instead <span style='color:red;'>redundant</span><br><b><u>5)Containing differences</u></b>:same length but differences on some characters π.χ <span style='color:red;'>difmereoce</span> instead of <span style='color:red;'>difference</span><br>
+<b><u>6)Wrong token order</u></b>:Same tokens/words but in wrong order<br>e.g. <span style='color:red;'>is correct This</span> instead of <span style='color:red;'>This is correct</span><br>
+ <b><u>7)Arithmetic cases</u></b>:Cases where we need to compare some mathematical values.We can also use the variables <b>\$in</b> and <b>\$out</b> in order to get a value based on input and output.<br>For input \$in e.g. Output:(\$in+5) with assertion >= the system will check if the output is >= from the $in(put)+5 <br>
+For output \$out e.g Output:( \$out ^ 2) with assertion = the system will check if the output it equal(=) with the square of the $out(put)";
+ 
+
 $langHGroup = "Groups";
 $langHGroup_student = $langHGroup ;
 $langGroupContent = "<p>This module allows you to create and manage work groups. 

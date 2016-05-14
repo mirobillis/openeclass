@@ -5013,16 +5013,16 @@ $langAutoJudgeScenariosPassed = 'Περασμένα Σενάρια';
 
 // asserts
 $langAutoJudgeAssertions = array(
-    "eq" => "είναι ίσο με",
-    "same" => "είναι ίδιο με",
-    "notEq" => "δεν είναι ίσο με",
-    "notSame" => "δεν είναι ίδιο με",
+    "eq" => "είναι ίση με",
+    "same" => "είναι ίδια με",
+    "notEq" => "μην είναι ίση με",
+    "notSame" => "μην είναι ίδια με",
     "integer" => "είναι ακέραιος",
     "float" => "είναι δεκαδικός",
     "digit" => "είναι ψηφίο",
-    "boolean" => "είναιboolean",
-    "notEmpty" => "δεν είναι κενό",
-    "notNull" => "δεν είναι Null",
+    "boolean" => "είναι boolean",
+    "notEmpty" => "μην είναι κενό",
+    "notNull" => "μην είναι Null",
     "string" => "είναι string",
     "startsWith" => "αρχίζει με",
     "endsWith" => "τελειώνει με",
@@ -5033,6 +5033,18 @@ $langAutoJudgeAssertions = array(
     "false" => "είναι false",
     "isJsonString" => "είναι JSON string ",
     "isObject" => "είναι αντικείμενο",
+    "CaseSensitive" => "είναι Case Sensitive",
+    "anagram" => "έχει αναγραμματισμούς" ,
+    "missing" => "έχει λιγότερους χαρακτήρες" ,
+    "redundant" => "έχει περιττούς χαρακτήρες" ,
+    "different" =>  "περιέχει διαφορές",
+    "order" => "έχει λάθος σειρά λέκτικών" ,
+    "arithmeticEq" => "είναι αριθμητικά =" ,
+    "arithmeticNeq" => "είναι αριθμητικά !=" ,
+    "arithmeticGeq" => "είναι αριθμητικά >=" ,
+    "arithmeticGr" => "είναι αριθμητικά >" , 
+    "arithmeticLeq" => "είναι αριθμητικά <=" ,
+    "arithmeticLs" => "είναι αριθμητικά <"     
 );
 
 // result report
@@ -5040,6 +5052,21 @@ $langAutoJudgeDetailedReport = 'Αυτόματος κριτής: Αναλυτι�
 $langAutoJudgeResultsFor = 'Αποτελέσματα για';
 $langAutoJudgeNotEnabledForReport = ' Ο αυτόματος κριτής δεν είναι ενεργοποιημένος για την συγκεκριμένη εργασία. ';
 $langAutoJudgeDownloadPdf = 'Λήψη σε μορφή PDF';
+
+// autojudge feedback scenarios
+$langAutoJudgeFeedBack = 'Ανάδραση'; 
+$langAutoJudgeFeedBackNew = 'Νέα Περίπτωση Ανάδρασης';
+$langAutoJudgeFeedBackText = 'Μήνυμα Ανάδρασης';
+$langAutoJudgeFeedBackDelete = 'Διαγραφή Περίπτωσης';
+$langAutoJudgeFeedBackBadOutput = 'Λανθασμένη έξοδος'; 
+$langAutoJudgeFeedBackForInput ='Για είσοδο';
+$langAutoJudgeFeedBackOutBe = 'η έξοδος πρέπει να';
+$langAutoJudgeFeedBackMistake = 'Πιθανό λάθος: Η έξοδος ';
+$langAutoJudgeFeedBackResultMatch = 'Οι λανθασμένοι χαρακτήρες είναι υπογραμμισμένοι και βρίσκονται στις θέσεις(ξεκινώντας απο το 0)';
+$langAutoJudgeFeedBackResultMatchTokens = 'Τα λανθασμένα λεκτικά είναι υπογραμμισμένα και βρίσκονται στις θέσεις(ξεκινώντας απο το 1)';
+$langAutoJudgeFeedBackGeneral = 'Γενικό μήνυμα ανάδρασης για σφάλματα';
+$langAutoJudgeFeedBackScenarios = 'Ειδικές περιπτώσεις μηνυμάτων ανάδρασης για σφάλματα';
+
 
 // Tags
 $langTag = 'Ετικέτα';
